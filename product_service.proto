@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package product_service;
+
+message ProductIdentifier {
+  int64 id = 1;
+}
+
+message ProductDetails{
+  int64 id = 1;
+  int64 quantity = 2;
+  string vendors = 3;
+}
+
+service ProductService {
+  rpc GetProductDetails(ProductIdentifier) returns(ProductDetails) {}
+}
+
