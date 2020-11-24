@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vendor_service;
+
+message ProductIdentifier {
+  int64 id = 1;
+}
+
+message VendorDetails {
+  string details = 1;
+}
+
+service VendorService {
+  rpc GetVendorForProduct(ProductIdentifier) returns(VendorDetails) {}
+}

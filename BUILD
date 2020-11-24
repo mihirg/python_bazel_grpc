@@ -11,17 +11,27 @@ proto_library(
     srcs = ["product_service.proto"],
 )
 
+proto_library(
+    name = "vendor_service_proto",
+    srcs = ["vendor_service.proto"],
+)
+
 # Uses the proto collection to generate stub code
 python_grpclib_library(
     name = "product_service_grpc_lib",
     deps = [":product_service_proto"],
 )
 
+python_grpclib_library(
+    name = "vendor_service_grpc_lib",
+    deps = [":vendor_service_proto"],
+)
+
 # Product Service Server
 py_binary(
     name = "product_service_server",
     srcs = ["product_service_server.py"],
-    deps = [":product_service_grpc_lib"]
+    deps = [":product_service_grpc_lib", ":vendor_service_grpc_lib"]
 )
 
 # Product Serivice Client
@@ -31,4 +41,9 @@ py_binary(
     deps = [":product_service_grpc_lib"]
 )
 
+py_binary(
+    name = "vendor_service_server",
+    srcs = ["vendor_service_server.py"],
+    deps = [":vendor_service_grpc_lib"]
+)
 

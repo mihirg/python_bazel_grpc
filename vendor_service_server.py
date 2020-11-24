@@ -1,26 +1,21 @@
 from concurrent import futures
 import logging
 import grpc
-import product_service_pb2
-import product_service_pb2_grpc
 import vendor_service_pb2
 import vendor_service_pb2_grpc
+
 import time
 
 from grpc_opentracing import open_tracing_server_interceptor
 from grpc_opentracing.grpcext import intercept_server
 from jaeger_client import Config
 
-class ProductServiceImpl(product_service_pb2_grpc.ProductServiceServicer):
 
-    def GetProductDetails(self, request, context):
+class VendorServiceImpl(vendor_service_pb2_grpc.VendorServiceServicer):
+
+    def GetVendorForProduct(self, request, context):
         logging.info(f'Received request for product {request.id}')
-        with grpc.insecure_channel('localhost:60051') as channel:
-            stub = vendor_service_pb2_grpc.VendorServiceStub(channel)
-            response = stub.GetVendorForProduct(vendor_service_pb2.ProductIdentifier(id=request.id))
-        logging.info(f'got vendor list from vendor service {response.details}')
-
-        return product_service_pb2.ProductDetails(id=request.id, quantity=10, vendors=response.details)
+        return vendor_service_pb2.VendorDetails(details=f"These are vendor details for product {request.id} ")
 
 def serve():
     config = Config(
@@ -31,14 +26,14 @@ def serve():
             },
             'logging': True,
         },
-        service_name='product_service')
+        service_name='vendor_service')
     tracer = config.initialize_tracer()
     tracer_interceptor = open_tracing_server_interceptor(
         tracer, log_payloads=True)
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     server = intercept_server(server, tracer_interceptor)
-    product_service_pb2_grpc.add_ProductServiceServicer_to_server(ProductServiceImpl(), server)
-    server.add_insecure_port('[::]:50051')
+    vendor_service_pb2_grpc.add_VendorServiceServicer_to_server(VendorServiceImpl(), server)
+    server.add_insecure_port('[::]:60051')
     server.start()
     # server.wait_for_termination()
     try:
@@ -48,6 +43,7 @@ def serve():
         server.stop(0)
 
 
+
 if __name__ == '__main__':
-    logging.basicConfig(filename="product_server.log", level=logging.INFO)
+    logging.basicConfig(filename="vendor_server.log", level=logging.INFO)
     serve()
